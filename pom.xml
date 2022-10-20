@@ -12,7 +12,7 @@
     <artifactId>starter</artifactId>
     <name>starter</name>
     <description>starter</description>
-    <version>3.0.16</version>
+    <version>3.0.17</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.csctracker</groupId>
             <artifactId>CscTrackerCore</artifactId>
-            <version>4.0.16</version>
+            <version>4.0.17</version>
         </dependency>
     </dependencies>
 
