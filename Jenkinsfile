@@ -40,6 +40,8 @@ pipeline {
                     if (env.BRANCH_NAME == 'master') {
                         echo 'Master'
                         VERSION = VersionNumber(versionNumberString: '${BUILD_DATE_FORMATTED, "yy"}.${BUILD_WEEK,XX}.${BUILDS_THIS_WEEK,XXX}')
+                        sh 'mvn versions:set versions:commit -DnewVersion=RELEASE'
+                        sh 'mvn clean install package -DskipTests'
                     } else {
                         echo 'Dev'
                         VERSION = VersionNumber(versionNumberString: '${BUILD_DATE_FORMATTED, "yyyyMMdd"}.${BUILDS_TODAY}.${BUILD_NUMBER}')
