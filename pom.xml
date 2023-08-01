@@ -24,7 +24,7 @@
         <dependency>
             <groupId>com.csctracker</groupId>
             <artifactId>CscTrackerCore</artifactId>
-            <version>RELEASE</version>
+            <version>23.31.001</version>
         </dependency>
     </dependencies>
 
@@ -44,5 +44,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
