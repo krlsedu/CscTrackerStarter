@@ -23,6 +23,7 @@ pipeline {
                 expression { env.RELEASE_COMMIT != '0' }
             }
             steps {
+                sh 'mvn versions:set versions:commit -DnewVersion=TEMP'
                 sh 'mvn clean install -DskipTests'
             }
         }
