@@ -12,7 +12,7 @@
     <artifactId>starter</artifactId>
     <name>starter</name>
     <description>starter</description>
-    <version>23.35.001</version>
+    <version>23.35.002</version>
     <packaging>pom</packaging>
 
     <properties>
