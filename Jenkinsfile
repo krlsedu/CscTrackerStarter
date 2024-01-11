@@ -1,5 +1,8 @@
 #!groovy
 env.RELEASE_COMMIT = "1";
+env.VERSION_NAME = "";
+env.REPOSITORY_NAME = "CscTrackerStarter"
+env.LIBRARY_NAME = "CscTrackerStarter-starter"
 
 pipeline {
     agent none
@@ -45,23 +48,57 @@ pipeline {
                         sh 'mvn clean install package -DskipTests'
                     } else {
                         echo 'Dev'
-                        VERSION = VersionNumber(versionNumberString: '${BUILD_DATE_FORMATTED, "yyyyMMdd"}.${BUILDS_TODAY}.${BUILD_NUMBER}')
+                        VERSION = VersionNumber(versionNumberString: '${BUILD_DATE_FORMATTED, "yyyyMMdd"}.${BUILDS_TODAY,XX}.${BUILD_NUMBER,XXXXX}')
                         VERSION = VERSION + '-SNAPSHOT'
                     }
 
-                    echo "Creating a new tag"
-                    sh 'git pull origin master'
-                    sh 'mvn versions:set versions:commit -DnewVersion=' + VERSION
-                    sh 'mvn clean install package -DskipTests'
-
                     withCredentials([usernamePassword(credentialsId: 'gitHub', passwordVariable: 'password', usernameVariable: 'user')]) {
                         script {
-                            sh "git add ."
-                            sh "git config --global user.email 'krlsedu@gmail.com'"
-                            sh "git config --global user.name 'Carlos Eduardo Duarte Schwalm'"
-                            sh "git commit -m 'Triggered Build: " + VERSION + "'"
-                            sh 'git push https://krlsedu:${password}@github.com/krlsedu/CscTrackerStarter.git HEAD:' + env.BRANCH_NAME
+                            echo "Creating a new tag"
+                            sh 'git pull https://krlsedu:${password}@github.com/krlsedu/' + env.REPOSITORY_NAME + '.git HEAD:' + env.BRANCH_NAME
+                            sh 'mvn versions:set versions:commit -DnewVersion=' + VERSION
+                            sh 'mvn clean install package -DskipTests'
+                            if (env.BRANCH_NAME == 'master') {
+                                sh "git add ."
+                                sh "git config --global user.email 'krlsedu@gmail.com'"
+                                sh "git config --global user.name 'Carlos Eduardo Duarte Schwalm'"
+                                sh "git commit -m 'Triggered Build: " + VERSION + "'"
+                                sh 'git push https://krlsedu:${password}@github.com/krlsedu/' + env.REPOSITORY_NAME + '.git HEAD:' + env.BRANCH_NAME
+                            }
                         }
+                    }
+                    env.VERSION_NAME = VERSION
+                }
+            }
+        }
+
+
+        stage('Update dos serviços dependentes') {
+            agent any
+            when {
+                expression { env.RELEASE_COMMIT != '0' }
+            }
+            steps {
+                script {
+                    for (int i = 60; i >= 0; i--) {
+                        println "Waiting... ${i} seconds remaining."
+                        sleep(time: 1, unit: 'SECONDS')
+                    }
+                    withCredentials([string(credentialsId: 'csctracker_token', variable: 'token_csctracker')]) {
+                        def xCorrelationId = 'update-lib_' + env.LIBRARY_NAME + '-' + env.VERSION_NAME
+                        def url = 'https://redirect.loclx.io/updater/' + env.LIBRARY_NAME + '/' + env.VERSION_NAME
+                        println 'url ' + url
+                        println 'xCorrelationId ' + xCorrelationId
+                        def response = httpRequest acceptType: 'APPLICATION_JSON',
+                                contentType: 'APPLICATION_JSON',
+                                httpMode: 'POST', quiet: true,
+                                requestBody: '''{}''',
+                                customHeaders: [
+                                        [name: 'authorization', value: 'Bearer ' + env.token_csctracker],
+                                        [name: 'x-correlation-id', value: xCorrelationId]
+                                ],
+                                url: '' + url
+                        println 'Response: ' + response.content
                     }
                 }
             }
