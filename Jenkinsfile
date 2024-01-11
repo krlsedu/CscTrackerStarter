@@ -2,7 +2,7 @@
 env.RELEASE_COMMIT = "1";
 env.VERSION_NAME = "";
 env.REPOSITORY_NAME = "CscTrackerStarter"
-env.LIBRARY_NAME = "CscTrackerStarter-starter"
+env.LIBRARY_NAME = "CscTrackerStarter-parent"
 
 pipeline {
     agent none
